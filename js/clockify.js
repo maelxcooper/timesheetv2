@@ -1,7 +1,7 @@
 // ===== 1. SETUP =====
 const STORAGE_KEY = "timesheet-v1";
 const DAILY_GOAL = 480;   // 8 hours, in minutes
-const MAX_SHOWN = 50;     // how many entries to display
+let maxShown = 50;       // how many entries to display (change it with the box at the bottom)
 
 // Your projects: "CODE": "label". When you type just the code (e.g. PRJ-24067) and leave the box,
 // it fills in automatically as "PRJ-24067 - de-DE". Add one line per project, with a comma at the end.
@@ -127,7 +127,7 @@ function render() {
   // Show a date header whenever the date changes
   // Entries on the same day with the same description and project are shown as one combined row
   const keyOf = (item) => `${item.date}|${item.entry.d.toLowerCase()}|${item.entry.p.toLowerCase()}`;
-  const shown = all.slice(0, MAX_SHOWN);
+  const shown = all.slice(0, maxShown);
   const members = {};
   for (const item of shown) {
     if (item.entry.d) (members[keyOf(item)] ??= []).push(item);
@@ -155,7 +155,7 @@ function render() {
   }
 
   $("list").innerHTML = html || '<div class="mut">No entries yet.</div>';
-  $("more").textContent = all.length > MAX_SHOWN ? `Showing latest ${MAX_SHOWN} of ${all.length} entries.` : "";
+  $("more").textContent = all.length > maxShown ? `Showing latest ${maxShown} of ${all.length} entries.` : "";
 
   // Dropdown options: the PROJECTS list plus projects you already used
   const listed = Object.entries(PROJECTS).map(([code, label]) => (label ? `${code} - ${label}` : code));
@@ -288,6 +288,12 @@ $("list").addEventListener("change", (event) => {
 // While typing a time: "1500" becomes "15:00"
 $("list").addEventListener("input", (event) => {
   if (event.target.matches("[data-time]")) fixTime(event.target, false);
+});
+
+// The "Show 50 / 100 / 150 entries" box at the bottom
+$("limit").addEventListener("change", () => {
+  maxShown = Number($("limit").value);
+  render();
 });
 
 // Calendar icon: open the date picker, and show the chosen date as a tooltip
